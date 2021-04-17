@@ -2,7 +2,7 @@
 - name: Instalar nginx e docker
   gather_facts: No
   hosts: mandic
-
+  
   tasks:
     - name: Instalar yum utils
       yum:
@@ -22,7 +22,7 @@
     - name: Reverse proxy config
       template:
         src: nginx.conf
-        dest: /etc/nginx/nginx.conf
+        dest: /home/daniel/workspace/Teste-Base-Mandic-DanielRodrigues/nginx.conf
 
     - name: Iniciar nginx
       service: 
@@ -63,11 +63,13 @@
         state: started
         enabled: yes
       become: yes
+#teste
 
     - name: desativando o SELINUX
       selinux:
         state: disabled
-
+     
+#teste
     - name: Liberando porta 80
       iptables:
         chain: INPUT
