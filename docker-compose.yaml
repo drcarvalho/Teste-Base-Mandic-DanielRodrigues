@@ -76,9 +76,5 @@ services:
 
 volumes:
   mysql_vol: {}
-  mariadb_data:
-    driver: local
   magento_data:
-    driver: local
-  elasticsearch_data:
     driver: local
