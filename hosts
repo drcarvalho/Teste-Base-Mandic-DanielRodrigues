@@ -43,5 +43,5 @@
 ## db-[99:101]-node.example.com
 
 [mandic]
-10.10.10.6
-# 54.191.185.34 ansible_ssh_private_key_file=/home/daniel/Downloads/startcentos.pem ansible_ssh_user=centos ansible_become=true
+#10.10.10.6
+44.242.173.6 ansible_ssh_private_key_file=/home/daniel/Downloads/centos7.pem ansible_ssh_user=centos ansible_become=true

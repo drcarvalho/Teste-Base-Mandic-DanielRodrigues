@@ -1,0 +1,105 @@
+---
+- name: Instalação do nginx e docker e docker-compose
+  gather_facts: No
+  hosts: mandic
+  
+  tasks:
+    - name: Instalar yum utils
+      yum:
+        name: yum-utils
+        state: latest
+
+    - name: Adicionar epel-release repo
+      yum:
+        name: epel-release
+        state: present
+
+#instalação do nginx configuração e inicialização
+        
+    - name: Instalar nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Reverse proxy config
+      template:
+        src: nginx.conf
+        dest: /etc/nginx/nginx.conf
+
+    - name: Iniciar nginx
+      service: 
+        name: nginx
+        state: started
+
+    - name: Add Docker repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docer-ce.repo
+      become: yes
+
+    - name: Ativar Docker Edge repo
+      ini_file:
+        dest: /etc/yum.repos.d/docer-ce.repo
+        section: 'docker-ce-edge'
+        option: enabled
+        value: 0
+      become: yes
+
+    - name: Ativar Docker Test repo
+      ini_file:
+        dest: /etc/yum.repos.d/docer-ce.repo
+        section: 'docker-ce-test'
+        option: enabled
+        value: 0
+      become: yes
+
+    - name: Instalar Docker
+      package:
+        name: docker-ce
+        state: latest
+      become: yes
+
+    - name: Iniciar Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      become: yes
+      
+#Desativando selinux
+
+
+    - name: desativando o SELINUX
+      selinux:
+        state: disabled
+     
+#liberar portas
+
+    - name: Liberando porta 80
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: 80
+
+#instalação docker-compose
+        
+    - name: Install docker-compose
+      get_url: 
+       url : https://github.com/docker/compose/releases/download/1.29.0/docker-compose-Linux-x86_64
+       dest: /usr/bin/docker-compose
+       mode: 'a+x'
+       
+#copia o arquivo docker-compose local para o destino
+
+    - name: Copiando docker-compose
+      copy: 
+        src: docker-compose.yaml
+        dest: /tmp/docker-compose.yaml
+        
+#inicia a receita do docker-compose
+
+    - name: Start  servico docker-compose
+      shell: docker-compose -f /tmp/docker-compose.yaml up -d
+   
+
+
