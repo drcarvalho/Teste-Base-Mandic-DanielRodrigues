@@ -45,7 +45,8 @@ services:
       WORDPRESS_DB_NAME: wordpress_database
     volumes:
       ["./:/var/www/html"]
-
+      
+#instalação tomcat
   db:
     image: de1m0s/postgres-compose:1.1
     container_name: tomcat-db-container
