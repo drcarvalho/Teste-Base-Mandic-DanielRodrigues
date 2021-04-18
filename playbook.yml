@@ -2,6 +2,7 @@
 - name: Instalação do nginx e docker e docker-compose
   gather_facts: No
   hosts: mandic
+  become: true
   
   tasks:
     - name: Instalar yum utils
@@ -30,6 +31,35 @@
       service: 
         name: nginx
         state: started
+
+#Desativando IpTables
+    - name: get iptables rules
+      shell: iptables -L
+      register: iptablesrules
+ 
+    - name: Allow port 80
+      command: /sbin/iptables -I INPUT 1 -p tcp --dport http -j ACCEPT -m comment --comment "nginx"
+      when: iptablesrules.stdout.find("nginx") == -1
+ 
+    - name: save iptables
+      command: iptables-save
+
+#Dando permissão no SELinux
+
+    - name: Put SELinux in permissive mode, logging actions that would be blocked.
+      ansible.posix.selinux:
+        policy: targeted
+        state: permissive
+     
+#liberar portas
+
+    - name: Liberando porta 80
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: 80
+
+#instalação docker e docker-compose
 
     - name: Add Docker repo
       get_url:
@@ -65,29 +95,23 @@
         state: started
         enabled: yes
       become: yes
-      
-#Desativando selinux
-
-
-    - name: desativando o SELINUX
-      selinux:
-        state: disabled
-     
-#liberar portas
-
-    - name: Liberando porta 80
-      iptables:
-        chain: INPUT
-        protocol: tcp
-        destination_port: 80
-
-#instalação docker-compose
-        
+              
     - name: Install docker-compose
       get_url: 
        url : https://github.com/docker/compose/releases/download/1.29.0/docker-compose-Linux-x86_64
        dest: /usr/bin/docker-compose
        mode: 'a+x'
+       
+    - name: Add user "{{ lookup('env','USER') }}" to docker group
+      user:
+          name: "{{ lookup('env','USER') }}"
+          groups: docker
+          append: yes
+      become: yes
+
+    - name: set vm.max_map_count=262144
+      command: sysctl -w vm.max_map_count=262144     
+
        
 #copia o arquivo docker-compose local para o destino
 
