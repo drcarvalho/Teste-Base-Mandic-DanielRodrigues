@@ -32,18 +32,6 @@
         name: nginx
         state: started
 
-#Configuração IpTables
-    - name: get iptables rules
-      shell: iptables -L
-      register: iptablesrules
- 
-    - name: Allow port 80
-      command: /sbin/iptables -I INPUT 1 -p tcp --dport http -j ACCEPT -m comment --comment "nginx"
-      when: iptablesrules.stdout.find("nginx") == -1
- 
-    - name: save iptables
-      command: iptables-save
-
 #Dando permissão no SELinux
 
     - name: SELinux no modo permissivo.
@@ -102,7 +90,11 @@
        dest: /usr/bin/docker-compose
        mode: 'a+x'
         
-
+#pagina estatica
+    - name: Pagina site estatico 
+      template:
+        src: index.html
+        dest: /usr/share/nginx/html/index.html
        
 #copia o arquivo docker-compose local para o destino
 
