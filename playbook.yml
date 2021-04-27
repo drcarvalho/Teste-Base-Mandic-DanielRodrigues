@@ -2,7 +2,8 @@
 - name: Instalação do nginx e docker e docker-compose
   gather_facts: No
   hosts: mandic
-  become: true
+  become: yes
+  become_method: sudo
   
   tasks:
     - name: Instalar yum utils
